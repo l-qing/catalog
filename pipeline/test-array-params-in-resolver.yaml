@@ -1,0 +1,39 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: mock-pipeline
+spec:
+  params:
+    - name: tags
+      default:
+        - pr-latest
+  tasks:
+    - name: task-1
+      taskRef:
+        resolver: http
+        params:
+          - name: url
+            value: https://raw.githubusercontent.com/l-qing/catalog/chore/test-array-params-in-resolver/task/test-array-params-in-resolver.yaml
+    - name: task-2
+      taskRef:
+        resolver: http
+        params:
+          - name: url
+            value: https://raw.githubusercontent.com/l-qing/catalog/chore/test-array-params-in-resolver/task/test-array-params-in-resolver.yaml
+      params:
+        - name: tags
+          value: $(params.tags[*])
+# ---
+# apiVersion: tekton.dev/v1beta1
+# kind: PipelineRun
+# metadata:
+#   name: mock-pipeline-run
+# spec:
+#   pipelineRef:
+#     name: mock-pipeline
+#   params:
+#     - name: tags
+#       value:
+#         - latest
+#         - v1
+#         - v2
