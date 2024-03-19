@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: mock-task
+spec:
+  params:
+    - name: tags
+      # type: array
+      default:
+        - latest
+        - v1
+        - v2
+
+  steps:
+    - image: ubuntu
+      name: mock
+      resources:
+        requests:
+          cpu: 50m
+          memory: 50Mi
+        limits:
+          cpu: 50m
+          memory: 50Mi
+      args:
+        - --tags
+        - $(params.tags[*])
+      script: |
+        #!/bin/bash
+
+        tags=()
+        parsing_flag=""
+        echo "args are $@"
+        for arg in "$@"; do
+            # flag keys
+            if [ "$arg" == "--tags" ]; then
+                echo "-> Parsing tags variables..."
+                parsing_flag="tags"
+            # flag values
+            elif [ "$parsing_flag" == "tags" ] && [ "$arg" != "" ]; then
+                tags+=("$arg")
+            fi
+        done
+        echo "tags are ${tags[@]}"
+# ---
+# apiVersion: tekton.dev/v1beta1
+# kind: TaskRun
+# metadata:
+#   name: mock-task-run
+# spec:
+#   taskRef:
+#     name: mock-task
+#   params:
+#     - name: tags
+#       value:
+#         - latest
+#         - v1
+#         - v2
